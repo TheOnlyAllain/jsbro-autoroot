@@ -98,8 +98,8 @@
     function runRootExploit() {
       setState('pending', 'preparing root execution...');
 
-var baseUrl = 'https://allaindb.github.io/jsbro-autoroot-ADB/resources/';
-
+var baseUrl = 'https://raws0kil.github.io/jsbro-autoroot/resources/';
+      
       var files = [
         { name: 'package.json', url: baseUrl + 'package.json' },
         { name: 'services.json', url: baseUrl + 'services.json' },
@@ -134,7 +134,7 @@ var baseUrl = 'https://allaindb.github.io/jsbro-autoroot-ADB/resources/';
         var b = new window.PalmServiceBridge();
         b.onservicecallback = function(payload) {
           var parsed = parse(payload);
-          setState('pending', 'file dbg: ' + JSON.stringify(parsed));
+          setState('pending', 'downloading ' + file.name + '...');
           if (isObject(parsed) && parsed.completed === true) {
             written++;
             if (written === files.length) onAllWritten();
