@@ -195,7 +195,6 @@ b.call('luna://com.webos.service.downloadmanager/download',
           setState('pending', parsed.target || parsed.state || 'downloading...');
           return;
         }
-        setState('pending', 'dbg: ' + JSON.stringify(parsed));
         return;
         settled = true;
         failStep('download status query', 'status query returned an unexpected payload');
